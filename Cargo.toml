@@ -1,0 +1,32 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/browser-search-cli",
+    "crates/browser-search-daemon",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+rust-version = "1.97.1"
+
+[workspace.dependencies]
+anyhow = "=1.0.104"
+axum = { version = "=0.8.9", features = ["macros", "ws"] }
+clap = { version = "=4.6.4", features = ["derive", "env"] }
+dashmap = "=6.2.1"
+futures-util = "=0.3.33"
+indexmap = { version = "=2.14.0", features = ["serde"] }
+rand = "=0.10.2"
+reqwest = { version = "=0.13.4", default-features = false, features = ["json"] }
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+tokio = { version = "=1.53.1", features = ["full"] }
+toml = "=1.1.4"
+tower = { version = "=0.5.3", features = ["util"] }
+tower-http = { version = "=0.7.0", features = ["cors", "trace"] }
+tracing = "=0.1.44"
+tracing-subscriber = { version = "=0.3.23", features = ["env-filter", "fmt"] }
+url = "=2.5.8"
+uuid = { version = "=1.24.0", features = ["serde", "v4"] }

@@ -1,0 +1,9 @@
+/target/
+/extension/node_modules/
+/extension/dist/
+/extension/.npm-cache/
+*.log
+*.tmp
+config.toml
+.DS_Store
+/Example-Project/

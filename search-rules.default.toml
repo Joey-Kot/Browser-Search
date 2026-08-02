@@ -1,0 +1,132 @@
+[common]
+base_url = "https://www.google.com/search"
+query_parameter = "q"
+start_parameter = "start"
+limit_parameter = "num"
+
+[common.params]
+lr = "lang_en|lang_zh-CN|lang_zh-TW|lang_ja"
+newwindow = "1"
+safe = "off"
+hl = "en"
+gl = "us"
+pws = "0"
+tbs = "lr:lang_1en|lang_1zh-CN|lang_1zh-TW|lang_1ja"
+
+[web]
+root_selectors = ["[data-snc]"]
+dedupe_field = "url"
+
+[web.params]
+udm = "14"
+
+[web.fields.title]
+selectors = ["[data-snhf] h3"]
+required = true
+
+[web.fields.description]
+selectors = ["[data-sncf]"]
+max_length = 1000
+
+[web.fields.url]
+selectors = ["[data-snhf] a"]
+attribute = "href"
+transform = "google_url"
+required = true
+
+[news]
+root_selectors = ["[data-news-cluster-id]"]
+dedupe_field = "url"
+
+[news.params]
+tbm = "nws"
+
+[news.fields.title]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(2)"]
+required = true
+
+[news.fields.description]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(3)"]
+max_length = 1000
+
+[news.fields.url]
+selectors = ["a"]
+attribute = "href"
+transform = "google_url"
+required = true
+
+[news.fields.source]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(1)"]
+
+[news.fields.time]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(4)"]
+
+[images]
+root_selectors = ["[data-snf][data-snm] [data-lpage]"]
+dedupe_field = "url"
+limit = 100
+
+[images.params]
+udm = "2"
+
+[images.fields.title]
+selectors = ["[data-bla] > img"]
+attribute = "alt"
+required = true
+
+[images.fields.imgurl]
+selectors = ["[data-bla] > img"]
+attribute = "src"
+transform = "absolute_url"
+required = true
+
+[images.fields.url]
+selectors = ["&"]
+attribute = "data-lpage"
+required = true
+
+[videos]
+root_selectors = ["[data-curl]"]
+dedupe_field = "url"
+
+[videos.params]
+udm = "7"
+
+[videos.fields.title]
+selectors = ["a:has(h3) > h3"]
+required = true
+
+[videos.fields.description]
+selectors = ["[data-curl] > div > div[jsshadow] > div:nth-child(2) > div:nth-child(1)"]
+max_length = 1000
+
+[videos.fields.url]
+selectors = ["a:has(h3)"]
+attribute = "href"
+transform = "google_url"
+required = true
+
+[videos.fields.duration]
+selectors = ["[data-curl] [data-vll][data-ved][tabindex] > div > div > div:nth-child(3) > div:nth-child(1) > span"]
+required = true
+
+[forums]
+root_selectors = ["[data-rpos]"]
+dedupe_field = "url"
+
+[forums.params]
+udm = "18"
+
+[forums.fields.title]
+selectors = ["[data-rpos] [data-snf][data-snhf] a > h3"]
+required = true
+
+[forums.fields.description]
+selectors = ["[data-rpos] [data-snf][data-sncf] > div"]
+max_length = 1000
+
+[forums.fields.url]
+selectors = ["[data-rpos] [data-snf][data-snhf] a"]
+attribute = "href"
+transform = "absolute_url"
+required = true

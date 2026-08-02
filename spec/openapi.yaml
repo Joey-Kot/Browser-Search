@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+  title: Browser Search API
+  version: 0.1.0
+  description: Local search API backed by a connected Chrome extension.
+servers:
+  - url: http://127.0.0.1:17330
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      security: []
+      operationId: health
+      responses:
+        "200":
+          description: Process liveness.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /v1/status:
+    get:
+      operationId: status
+      responses:
+        "200":
+          description: Extension connection and queue status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Status"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/search/{kind}:
+    post:
+      operationId: search
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            enum: [web, news, images, videos, forums]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+      responses:
+        "200":
+          description: Search results.
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/SearchFailed"
+        "429":
+          $ref: "#/components/responses/QueueFull"
+        "503":
+          $ref: "#/components/responses/BrowserUnavailable"
+        "504":
+          $ref: "#/components/responses/Timeout"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Health:
+      type: object
+      required: [status, version]
+      properties:
+        status:
+          const: ok
+        version:
+          type: string
+    Status:
+      type: object
+      required:
+        - extensionConnected
+        - activeJobs
+        - queuedJobs
+        - maxConcurrency
+      properties:
+        extensionConnected:
+          type: boolean
+        browserInstanceId:
+          type: [string, "null"]
+        extensionVersion:
+          type: [string, "null"]
+        activeJobs:
+          type: integer
+          minimum: 0
+        queuedJobs:
+          type: integer
+          minimum: 0
+        maxConcurrency:
+          type: integer
+          minimum: 1
+    SearchRequest:
+      type: object
+      additionalProperties: false
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 512
+        start:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          default: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+        timeoutMs:
+          type: integer
+          minimum: 1000
+          description: Defaults to the smaller of 30000 and executor.max_timeout_ms.
+    SearchResult:
+      type: object
+      description: Fields are defined by the selected profile in config.toml.
+      additionalProperties:
+        type: string
+    ErrorDetail:
+      type: object
+      required: [code, message, retryable]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        retryable:
+          type: boolean
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorDetail"
+  responses:
+    BadRequest:
+      description: Invalid search type or request body.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Missing or invalid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    SearchFailed:
+      description: Navigation or page extraction failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    QueueFull:
+      description: Search queue is full.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    BrowserUnavailable:
+      description: Chrome extension is not connected.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Timeout:
+      description: Search job timed out.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

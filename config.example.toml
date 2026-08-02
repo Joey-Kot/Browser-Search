@@ -1,0 +1,159 @@
+[server]
+listen = "127.0.0.1:17330"
+api_token = "replace-with-api-token"
+allow_cors = false
+
+[bridge]
+listen = "127.0.0.1:17331"
+extension_token = "replace-with-extension-token"
+# 留空时接受任意一个扩展；需要锁定时填写扩展弹窗显示的浏览器实例 ID。
+browser_instance_id = ""
+ping_interval_seconds = 20
+
+[executor]
+max_concurrency = 1
+# 扩展实际开页的全局最短间隔，任务页面清理完成后会重新开始计时，单位毫秒；设为 0 可关闭。
+min_operation_interval = 500
+max_queue_size = 64
+max_timeout_ms = 120000
+load_timeout_ms = 20000
+selector_timeout_ms = 10000
+
+# 公共搜索 URL 配置。每个接口的 params 会覆盖或追加自己的垂直参数。
+[search.common]
+base_url = "https://www.google.com/search"
+query_parameter = "q"
+start_parameter = "start"
+limit_parameter = "num"
+
+[search.common.params]
+lr = "lang_en|lang_zh-CN|lang_zh-TW|lang_ja"
+newwindow = "1"
+safe = "off"
+hl = "en"
+gl = "us"
+pws = "0"
+tbs = "lr:lang_1en|lang_1zh-CN|lang_1zh-TW|lang_1ja"
+
+# Web
+[search.web]
+root_selectors = ["[data-snc]"]
+dedupe_field = "url"
+
+[search.web.params]
+udm = "14"
+
+[search.web.fields.title]
+selectors = ["[data-snhf] h3"]
+required = true
+
+[search.web.fields.description]
+selectors = ["[data-sncf]"]
+max_length = 1000
+
+[search.web.fields.url]
+selectors = ["[data-snhf] a"]
+attribute = "href"
+transform = "google_url"
+required = true
+
+# News
+[search.news]
+root_selectors = ["[data-news-cluster-id]"]
+dedupe_field = "url"
+
+[search.news.params]
+tbm = "nws"
+
+[search.news.fields.title]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(2)"]
+required = true
+
+[search.news.fields.description]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(3)"]
+max_length = 1000
+
+[search.news.fields.url]
+selectors = ["a"]
+attribute = "href"
+transform = "google_url"
+required = true
+
+[search.news.fields.source]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(1)"]
+
+[search.news.fields.time]
+selectors = ["a > div > div:nth-of-type(2) > div:nth-of-type(4)"]
+
+# Images
+[search.images]
+root_selectors = ["[data-snf][data-snm] [data-lpage]"]
+dedupe_field = "url"
+limit = 100
+
+[search.images.params]
+udm = "2"
+
+[search.images.fields.title]
+selectors = ["[data-bla] > img"]
+attribute = "alt"
+required = true
+
+[search.images.fields.imgurl]
+selectors = ["[data-bla] > img"]
+attribute = "src"
+transform = "absolute_url"
+required = true
+
+[search.images.fields.url]
+selectors = ["&"]
+attribute = "data-lpage"
+required = true
+
+# Videos
+[search.videos]
+root_selectors = ["[data-curl]"]
+dedupe_field = "url"
+
+[search.videos.params]
+udm = "7"
+
+[search.videos.fields.title]
+selectors = ["a:has(h3) > h3"]
+required = true
+
+[search.videos.fields.description]
+selectors = ["[data-curl] > div > div[jsshadow] > div:nth-child(2) > div:nth-child(1)"]
+max_length = 1000
+
+[search.videos.fields.url]
+selectors = ["a:has(h3)"]
+attribute = "href"
+transform = "google_url"
+required = true
+
+[search.videos.fields.duration]
+selectors = ["[data-curl] [data-vll][data-ved][tabindex] > div > div > div:nth-child(3) > div:nth-child(1) > span"]
+required = true
+
+# Forums
+[search.forums]
+root_selectors = ["[data-rpos]"]
+dedupe_field = "url"
+
+[search.forums.params]
+udm = "18"
+
+[search.forums.fields.title]
+selectors = ["[data-rpos] [data-snf][data-snhf] a > h3"]
+required = true
+
+[search.forums.fields.description]
+selectors = ["[data-rpos] [data-snf][data-sncf] > div"]
+max_length = 1000
+
+[search.forums.fields.url]
+selectors = ["[data-rpos] [data-snf][data-snhf] a"]
+attribute = "href"
+transform = "absolute_url"
+required = true
