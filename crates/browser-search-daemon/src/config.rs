@@ -184,7 +184,7 @@ impl Default for ExecutorConfig {
     fn default() -> Self {
         Self {
             max_concurrency: 1,
-            min_operation_interval: 500,
+            min_operation_interval: 4000,
             max_queue_size: 64,
             max_timeout_ms: 120_000,
             load_timeout_ms: 20_000,
@@ -354,7 +354,7 @@ mod tests {
     #[test]
     fn default_rules_are_loaded_from_toml() {
         let config = Config::default();
-        assert_eq!(config.executor.min_operation_interval, 500);
+        assert_eq!(config.executor.min_operation_interval, 4000);
         assert_eq!(config.search.web.root_selectors, ["[data-snc]"]);
         assert_eq!(
             config.search.web.params.get("udm").map(String::as_str),

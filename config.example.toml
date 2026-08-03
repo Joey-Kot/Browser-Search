@@ -13,7 +13,7 @@ ping_interval_seconds = 20
 [executor]
 max_concurrency = 1
 # 扩展实际开页的全局最短间隔，任务页面清理完成后会重新开始计时，单位毫秒；设为 0 可关闭。
-min_operation_interval = 500
+min_operation_interval = 4000
 max_queue_size = 64
 max_timeout_ms = 120000
 load_timeout_ms = 20000

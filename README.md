@@ -434,7 +434,7 @@ ping_interval_seconds = 20
 
 [executor]
 max_concurrency = 1
-min_operation_interval = 500
+min_operation_interval = 4000
 max_queue_size = 64
 max_timeout_ms = 120000
 load_timeout_ms = 20000
@@ -457,7 +457,7 @@ See [config.example.toml](https://github.com/Joey-Kot/Browser-Search/blob/main/c
 | `bridge.browser_instance_id` | Empty | Optional Chrome-profile lock. When empty, any one extension instance can connect. |
 | `bridge.ping_interval_seconds` | `20` | Bridge heartbeat interval, clamped to `5..300` seconds. |
 | `executor.max_concurrency` | `1` | Maximum number of search jobs dispatched and not yet finished by the daemon, with a minimum of 1. |
-| `executor.min_operation_interval` | `500` | Global minimum interval between actual extension tab openings, in milliseconds; completing task-page cleanup restarts the interval. `0` disables it. Timeout and cancellation keep the task slot occupied until the extension confirms cleanup; after a disconnect, only the original browser instance may reconnect and confirm cleanup. |
+| `executor.min_operation_interval` | `4000` | Global minimum interval between actual extension tab openings, in milliseconds; completing task-page cleanup restarts the interval. `0` disables it. Timeout and cancellation keep the task slot occupied until the extension confirms cleanup; after a disconnect, only the original browser instance may reconnect and confirm cleanup. |
 | `executor.max_queue_size` | `64` | Maximum queued-job capacity, with a minimum of 1. A full queue returns `queue_full`. |
 | `executor.max_timeout_ms` | `120000` | Maximum allowed request `timeoutMs`, with a minimum of 1000ms. |
 | `executor.load_timeout_ms` | `20000` | Page-navigation timeout. It is capped by the remaining request time and has a minimum of 1000ms. |

@@ -434,7 +434,7 @@ ping_interval_seconds = 20
 
 [executor]
 max_concurrency = 1
-min_operation_interval = 500
+min_operation_interval = 4000
 max_queue_size = 64
 max_timeout_ms = 120000
 load_timeout_ms = 20000
@@ -457,7 +457,7 @@ selector_timeout_ms = 10000
 | `bridge.browser_instance_id` | 空 | 可选的 Chrome 配置锁；留空时接受任意一个扩展实例。 |
 | `bridge.ping_interval_seconds` | `20` | 通信桥心跳间隔，实际限制在 `5..300` 秒。 |
 | `executor.max_concurrency` | `1` | 守护程序同时派发且尚未结束的搜索任务上限，最小为 1。 |
-| `executor.min_operation_interval` | `500` | 扩展实际开页操作之间的全局最短间隔，单位毫秒；任务页面清理完成后会重新开始计时，设为 `0` 可关闭。超时和取消会持续占用原调度槽，直到扩展确认清理完成；连接断开后只允许原浏览器实例重连并确认清理。 |
+| `executor.min_operation_interval` | `4000` | 扩展实际开页操作之间的全局最短间隔，单位毫秒；任务页面清理完成后会重新开始计时，设为 `0` 可关闭。超时和取消会持续占用原调度槽，直到扩展确认清理完成；连接断开后只允许原浏览器实例重连并确认清理。 |
 | `executor.max_queue_size` | `64` | 最大排队任务数，至少为 1；队列已满时返回 `queue_full`。 |
 | `executor.max_timeout_ms` | `120000` | 单个请求允许的最大 `timeoutMs`，最小为 1000ms。 |
 | `executor.load_timeout_ms` | `20000` | 页面导航等待上限；实际不会超过请求剩余时间，最小为 1000ms。 |
