@@ -52,9 +52,6 @@ impl Environment {
             .unwrap_or(DEFAULT_BASE_URL);
         let mut base_url = Url::parse(raw_base_url)
             .map_err(|error| CliError::usage(format!("SEARCH_BASE_URL is invalid: {error}")))?;
-        if base_url.scheme() != "http" {
-            return Err(CliError::usage("SEARCH_BASE_URL must use http"));
-        }
         if base_url.query().is_some() || base_url.fragment().is_some() {
             return Err(CliError::usage(
                 "SEARCH_BASE_URL must not contain a query string or fragment",
@@ -456,5 +453,20 @@ mod tests {
         .unwrap();
         assert_eq!(resolved.base_url.as_str(), "http://127.0.0.1:17330/base/");
         assert_eq!(resolved.api_token, "token");
+    }
+
+    #[test]
+    fn environment_accepts_https_base_urls() {
+        let resolved = Environment {
+            base_url: Some("https://search.example.test/api".to_owned()),
+            api_token: Some("token".to_owned()),
+        }
+        .resolve()
+        .unwrap();
+
+        assert_eq!(
+            resolved.base_url.as_str(),
+            "https://search.example.test/api/"
+        );
     }
 }

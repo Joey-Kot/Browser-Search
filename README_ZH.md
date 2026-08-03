@@ -316,7 +316,7 @@ CLI 只通过环境变量读取服务地址和 API Token，不提供对应的命
 
 | 环境变量 | 是否必填 | 作用 |
 |---|---|---|
-| `SEARCH_BASE_URL` | 否 | 守护程序 HTTP 基础地址，只支持 `http`，默认 `http://127.0.0.1:17330`。 |
+| `SEARCH_BASE_URL` | 否 | 守护程序 API 基础地址（支持 HTTP 和 HTTPS），默认 `http://127.0.0.1:17330`。 |
 | `SEARCH_API_KEY` | 是 | 通过 `Authorization: Bearer <key>` 发送，必须等于守护程序的 `server.api_token`。 |
 
 Linux 和 macOS：

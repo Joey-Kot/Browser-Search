@@ -316,7 +316,7 @@ The CLI reads the service URL and API Token only from environment variables; it 
 
 | Environment variable | Required | Purpose |
 |---|---|---|
-| `SEARCH_BASE_URL` | No | Daemon HTTP base URL. Only `http` is supported. Default: `http://127.0.0.1:17330`. |
+| `SEARCH_BASE_URL` | No | Daemon API base URL (HTTP or HTTPS). Default: `http://127.0.0.1:17330`. |
 | `SEARCH_API_KEY` | Yes | Sent as `Authorization: Bearer <key>` and must equal the daemon `server.api_token`. |
 
 Linux and macOS:

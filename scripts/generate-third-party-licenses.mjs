@@ -12,16 +12,26 @@ const checkOnly = process.argv.includes("--check");
 
 const reviewedSelections = new Map([
   ["Apache-2.0", "Apache-2.0"],
+  ["Apache-2.0 AND ISC", "Apache-2.0 AND ISC"],
   ["Apache-2.0 OR BSL-1.0", "Apache-2.0"],
   ["Apache-2.0 OR MIT", "MIT"],
+  ["Apache-2.0 OR ISC OR MIT", "MIT"],
   ["Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", "MIT"],
   ["BSD-2-Clause OR Apache-2.0 OR MIT", "MIT"],
+  ["BSD-3-Clause", "BSD-3-Clause"],
   ["(MIT OR Apache-2.0) AND Unicode-3.0", "MIT AND Unicode-3.0"],
   ["MIT", "MIT"],
   ["MIT AND BSD-3-Clause", "MIT AND BSD-3-Clause"],
   ["MIT OR Apache-2.0", "MIT"],
   ["MIT OR Apache-2.0 OR LGPL-2.1-or-later", "MIT"],
   ["MIT/Apache-2.0", "MIT"],
+  ["CDLA-Permissive-2.0", "CDLA-Permissive-2.0"],
+  ["ISC", "ISC"],
+  [
+    "ISC AND (Apache-2.0 OR ISC) AND Apache-2.0 AND MIT AND BSD-3-Clause AND (Apache-2.0 OR ISC OR MIT) AND (Apache-2.0 OR ISC OR MIT-0)",
+    "Apache-2.0 AND ISC AND MIT AND BSD-3-Clause"
+  ],
+  ["ISC AND (Apache-2.0 OR ISC)", "Apache-2.0 AND ISC"],
   ["Unicode-3.0", "Unicode-3.0"],
   ["Unlicense OR MIT", "MIT"]
 ]);
@@ -29,7 +39,11 @@ const reviewedSelections = new Map([
 const requiredLicenseFiles = [
   "Apache-2.0.txt",
   "Atomic-Waker-THIRD-PARTY.txt",
+  "AWS-LC-SYS-THIRD-PARTY.txt",
+  "BSD-3-Clause.txt",
   "BSD-3-Clause-matchit.txt",
+  "CDLA-Permissive-2.0.txt",
+  "ISC.txt",
   "MIT.txt",
   "Spin-MIT.txt",
   "Unicode-3.0.txt",
@@ -43,6 +57,15 @@ const additionalNotices = new Map([
       versions: new Set(["1.1.2"]),
       links: [
         "[embedded Tokio/futures notices](THIRD_PARTY_LICENSES/Atomic-Waker-THIRD-PARTY.txt)"
+      ]
+    }
+  ],
+  [
+    "aws-lc-sys",
+    {
+      versions: new Set(["0.43.0"]),
+      links: [
+        "[AWS-LC third-party notices](THIRD_PARTY_LICENSES/AWS-LC-SYS-THIRD-PARTY.txt)"
       ]
     }
   ],
@@ -170,6 +193,31 @@ function baseLicenseLinks(packageMetadata, selection) {
   if (selection === "Apache-2.0") {
     return ["[Apache-2.0](THIRD_PARTY_LICENSES/Apache-2.0.txt)"];
   }
+  if (selection === "Apache-2.0 AND ISC") {
+    return [
+      "[Apache-2.0](THIRD_PARTY_LICENSES/Apache-2.0.txt)",
+      "[ISC](THIRD_PARTY_LICENSES/ISC.txt)"
+    ];
+  }
+  if (selection === "Apache-2.0 AND ISC AND MIT AND BSD-3-Clause") {
+    return [
+      "[Apache-2.0](THIRD_PARTY_LICENSES/Apache-2.0.txt)",
+      "[ISC](THIRD_PARTY_LICENSES/ISC.txt)",
+      "[MIT](THIRD_PARTY_LICENSES/MIT.txt)",
+      "[BSD-3-Clause](THIRD_PARTY_LICENSES/BSD-3-Clause.txt)"
+    ];
+  }
+  if (selection === "BSD-3-Clause") {
+    return ["[BSD-3-Clause](THIRD_PARTY_LICENSES/BSD-3-Clause.txt)"];
+  }
+  if (selection === "CDLA-Permissive-2.0") {
+    return [
+      "[CDLA-Permissive-2.0](THIRD_PARTY_LICENSES/CDLA-Permissive-2.0.txt)"
+    ];
+  }
+  if (selection === "ISC") {
+    return ["[ISC](THIRD_PARTY_LICENSES/ISC.txt)"];
+  }
   if (selection === "Unicode-3.0") {
     return ["[Unicode-3.0](THIRD_PARTY_LICENSES/Unicode-3.0.txt)"];
   }
@@ -250,6 +298,10 @@ The Chrome extension's npm packages are development-only build tools and are not
 
 - [MIT](THIRD_PARTY_LICENSES/MIT.txt)
 - [Apache License 2.0](THIRD_PARTY_LICENSES/Apache-2.0.txt)
+- [ISC License](THIRD_PARTY_LICENSES/ISC.txt)
+- [BSD 3-Clause License](THIRD_PARTY_LICENSES/BSD-3-Clause.txt)
+- [Community Data License Agreement - Permissive 2.0](THIRD_PARTY_LICENSES/CDLA-Permissive-2.0.txt)
+- [AWS-LC bundled third-party notices](THIRD_PARTY_LICENSES/AWS-LC-SYS-THIRD-PARTY.txt)
 - [matchit / httprouter BSD 3-Clause notice](THIRD_PARTY_LICENSES/BSD-3-Clause-matchit.txt)
 - [Unicode License v3](THIRD_PARTY_LICENSES/Unicode-3.0.txt)
 - [Unicode data files notice used by regex-syntax](THIRD_PARTY_LICENSES/Unicode-Data-Files.txt)
@@ -258,7 +310,7 @@ The Chrome extension's npm packages are development-only build tools and are not
 
 ## License selection
 
-Where an upstream component is offered under multiple licenses, this distribution uses the MIT option when available. Components without an MIT option use the GPLv3-compatible Apache-2.0 or Unicode-3.0 terms shown below. An \`AND\` expression means every listed license applies.
+Where an upstream component is offered under multiple licenses, this distribution uses the MIT option when available. Components without an MIT option use the license terms shown below. An \`AND\` expression means every listed license applies.
 
 ## Components
 
