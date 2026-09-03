@@ -129,12 +129,12 @@ sequenceDiagram
         Daemon->>Daemon: 释放并发槽并恢复派发
     else 任务执行期间 Bridge 断开
         Daemon-->>Client: 503 browser_unavailable
-        Extension->>Extension: 中止活动任务并完成本地清理
-        Extension->>Chrome: 在已开页时分离调试器并关闭标签页
+        Extension->>Extension: 标记断开、中止活动任务并安排重连
         Note over Daemon,Extension: 清理待确认期间拒绝其他 browserInstanceId
         Extension->>Daemon: hello(相同 browserInstanceId)
-        Daemon->>Daemon: 确认旧任务清理并释放并发槽
+        Daemon->>Daemon: 恢复断线任务并释放并发槽
         Daemon-->>Extension: welcome(minOperationIntervalMs)
+        Extension->>Chrome: 在后台继续分离调试器并关闭任务标签页
     end
 ```
 
@@ -166,14 +166,14 @@ stateDiagram-v2
     closing --> cleanup_pending: 取消、超时或断线
     cleanup_pending --> cancelled: 取消任务清理确认
     cleanup_pending --> timed_out: 超时任务清理确认
-    cleanup_pending --> failed: 原实例重连确认断线任务清理
+    cleanup_pending --> failed: 原实例重连，本地清理可继续进行
     completed --> [*]
     failed --> [*]
     cancelled --> [*]
     timed_out --> [*]
 ```
 
-任务进入 `cleanup_pending` 时，HTTP 请求已经返回终态错误，但并发槽仍会保留到清理确认完成。扩展会把活动任务的标签页 ID 保存在 `chrome.storage.session` 中。扩展 Service Worker 再次启动时会清理记录中的遗留标签页；正常任务、取消、超时和通信桥断开也都会执行调试器分离与标签页关闭。
+任务进入 `cleanup_pending` 时，HTTP 请求已经返回终态错误，但并发槽会保留到取消或超时任务的清理确认完成，或者原浏览器实例完成断线恢复。扩展会把活动任务的标签页 ID 保存在 `chrome.storage.session` 中。扩展 Service Worker 再次启动时会清理记录中的遗留标签页；正常任务、取消、超时和通信桥断开也都会执行调试器分离与标签页关闭。Bridge 断开后，扩展会开始本地清理并独立重连；同一浏览器实例重连后，守护程序会恢复断线任务并释放其占用的槽位，此时本地浏览器清理仍可能尚未结束。
 
 ## 当前功能与限制
 
@@ -379,7 +379,7 @@ search web --help
 | `25` | `start=0,10,20`，共 3 页 |
 | `100` | `start=0,10,...,90`，共 10 页 |
 
-CLI 会先请求 `/v1/status`，读取 `maxConcurrency` 作为当前命令的最大分页并发。守护程序仍通过同一个全局 `executor.max_concurrency` 信号量约束 CLI、其他 CLI 和直接 API 调用中尚未结束的搜索任务。守护程序会在 Bridge 欢迎消息中把 `executor.min_operation_interval` 发送给扩展；扩展在真正调用 `chrome.tabs.create` 时执行全局间隔，并从最近一次页面清理完成时重新开始计时。任务超时或取消后会继续占用守护程序调度槽，直到扩展回传清理完成。Bridge 断开时，扩展会先完成所有活动任务的清理再重新连接；清理尚未确认时，只允许相同的 `browser_instance_id` 重连并确认。
+CLI 会先请求 `/v1/status`，读取 `maxConcurrency` 作为当前命令的最大分页并发。守护程序仍通过同一个全局 `executor.max_concurrency` 信号量约束 CLI、其他 CLI 和直接 API 调用中尚未结束的搜索任务。守护程序会在 Bridge 欢迎消息中把 `executor.min_operation_interval` 发送给扩展；扩展在真正调用 `chrome.tabs.create` 时执行全局间隔，并从最近一次页面清理完成时重新开始计时。任务超时或取消后会继续占用守护程序调度槽，直到扩展回传清理完成。Bridge 断开后，扩展会开始本地清理并独立重试连接；恢复期间只允许相同的 `browser_instance_id` 重连。重连成功后，守护程序会恢复断线任务并释放其占用的槽位，即使本地浏览器清理仍在进行。
 
 各页可以乱序完成，但 CLI 会按 `start` 对应的页序合并，再按 `url` 稳定去重，并最终截断到 `--search-num`。如果任一页失败，CLI 不再提交尚未开始的页面；已经发出的 HTTP 请求会等待结束，然后 CLI 返回错误。
 
@@ -518,7 +518,7 @@ search-server --config config.toml
 
 弹窗会显示：
 
-- 当前通信桥连接状态。
+- 当前通信桥连接状态；弹窗打开期间会自动刷新。
 - 自动生成并持久化的浏览器实例 ID。
 - 当前扩展版本。
 

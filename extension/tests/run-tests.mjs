@@ -3,7 +3,12 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = dirname(fileURLToPath(import.meta.url));
-for (const testFile of ["google.test.ts", "jobs.test.ts", "cdp.test.ts"]) {
+for (const testFile of [
+  "google.test.ts",
+  "jobs.test.ts",
+  "cdp.test.ts",
+  "bridge.test.ts"
+]) {
   const result = await build({
     entryPoints: [resolve(root, testFile)],
     bundle: true,

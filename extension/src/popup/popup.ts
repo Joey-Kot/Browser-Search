@@ -19,6 +19,17 @@ form.addEventListener("submit", (event) => {
 
 void initialize();
 
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "local") {
+    return;
+  }
+  const connectionStateChange = changes.bridgeConnectionState;
+  if (!connectionStateChange) {
+    return;
+  }
+  updateConnectionState(connectionStateChange.newValue);
+});
+
 async function initialize(): Promise<void> {
   const [settings, browserInstanceId, state] = await Promise.all([
     getBridgeSettings(),

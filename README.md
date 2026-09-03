@@ -129,12 +129,12 @@ sequenceDiagram
         Daemon->>Daemon: Release concurrency slot and unblock dispatch
     else Bridge disconnects with a task in flight
         Daemon-->>Client: 503 browser_unavailable
-        Extension->>Extension: Abort active jobs and finish local cleanup
-        Extension->>Chrome: Detach and close task tabs if created
+        Extension->>Extension: Mark disconnected, abort active jobs, and schedule reconnection
         Note over Daemon,Extension: Other browserInstanceId values are rejected while cleanup is pending
         Extension->>Daemon: hello(same browserInstanceId)
-        Daemon->>Daemon: Confirm old cleanup and release concurrency slots
+        Daemon->>Daemon: Recover disconnected jobs and release concurrency slots
         Daemon-->>Extension: welcome(minOperationIntervalMs)
+        Extension->>Chrome: Continue detaching and closing task tabs in the background
     end
 ```
 
@@ -166,14 +166,14 @@ stateDiagram-v2
     closing --> cleanup_pending: Cancel, timeout, or disconnect
     cleanup_pending --> cancelled: Cancel cleanup confirmed
     cleanup_pending --> timed_out: Timeout cleanup confirmed
-    cleanup_pending --> failed: Disconnect cleanup confirmed by same-instance reconnect
+    cleanup_pending --> failed: Same-instance reconnects; local cleanup may continue
     completed --> [*]
     failed --> [*]
     cancelled --> [*]
     timed_out --> [*]
 ```
 
-Entering `cleanup_pending` already completes the HTTP request with its terminal error, but the concurrency slot remains occupied until cleanup is confirmed. The extension stores active-job tab IDs in `chrome.storage.session`. When the extension Service Worker starts again, it closes tabs recorded as leftovers. Normal completion, cancellation, timeout, and bridge disconnection also detach the debugger and close the task tab.
+Entering `cleanup_pending` already completes the HTTP request with its terminal error, but the concurrency slot remains occupied until cancellation or timeout cleanup is confirmed, or a disconnect is recovered by the same browser instance. The extension stores active-job tab IDs in `chrome.storage.session`. When the extension Service Worker starts again, it closes tabs recorded as leftovers. Normal completion, cancellation, timeout, and bridge disconnection also detach the debugger and close the task tab. On a Bridge disconnect, the extension starts local cleanup and reconnects independently; after the same browser instance reconnects, the daemon recovers the disconnected jobs and releases their held slots while local browser cleanup may still be completing.
 
 ## Current Capabilities and Limitations
 
@@ -379,7 +379,7 @@ Non-image endpoints use a fixed page size of 10. The CLI rounds `--search-num` u
 | `25` | `start=0,10,20`, for 3 pages |
 | `100` | `start=0,10,...,90`, for 10 pages |
 
-The CLI first calls `/v1/status` and uses `maxConcurrency` as the maximum page-request concurrency for the current command. The daemon uses the same global `executor.max_concurrency` semaphore to bound unfinished search jobs submitted by this CLI, other CLI processes, and direct API callers. The daemon sends `executor.min_operation_interval` to the extension in the Bridge welcome message; the extension applies it at the actual `chrome.tabs.create` boundary and restarts the interval from the most recently completed page cleanup. On timeout or cancellation, the task keeps its daemon slot until the extension reports cleanup completion. After a Bridge disconnect, the extension finishes cleaning all active jobs before reconnecting; while cleanup is pending, only that same `browser_instance_id` may reconnect and confirm it.
+The CLI first calls `/v1/status` and uses `maxConcurrency` as the maximum page-request concurrency for the current command. The daemon uses the same global `executor.max_concurrency` semaphore to bound unfinished search jobs submitted by this CLI, other CLI processes, and direct API callers. The daemon sends `executor.min_operation_interval` to the extension in the Bridge welcome message; the extension applies it at the actual `chrome.tabs.create` boundary and restarts the interval from the most recently completed page cleanup. On timeout or cancellation, the task keeps its daemon slot until the extension reports cleanup completion. After a Bridge disconnect, the extension begins local cleanup and retries the connection independently. While recovery is pending, only that same `browser_instance_id` may reconnect; once it does, the daemon recovers disconnected jobs and releases their held slots even if local browser cleanup is still completing.
 
 Pages can complete out of order, but the CLI merges them in `start` order, performs stable deduplication by `url`, and truncates the merged array to `--search-num`. If any page fails, the CLI stops submitting pages that have not started, waits for already-issued HTTP requests to finish, and then returns the error.
 
@@ -518,7 +518,7 @@ The selected extension directory must contain `manifest.json` directly at its to
 
 The popup displays:
 
-- Current bridge connection state.
+- Current bridge connection state, updated while the popup is open.
 - The automatically generated and persisted browser instance ID.
 - Current extension version.
 

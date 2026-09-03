@@ -48,7 +48,7 @@ export class BridgeClient {
     if (this.state === "connecting" || this.isConnected()) {
       return;
     }
-    await this.setState("connecting");
+    this.setState("connecting");
     try {
       const [settings, browserInstanceId] = await Promise.all([
         getBridgeSettings(),
@@ -74,7 +74,7 @@ export class BridgeClient {
             protocolVersion: PROTOCOL_VERSION
           }
         });
-        void this.setState("connected");
+        this.setState("connected");
       });
 
       socket.addEventListener("message", (event) => {
@@ -82,22 +82,22 @@ export class BridgeClient {
       });
 
       socket.addEventListener("close", () => {
-        void this.handleClose(socket);
+        this.handleClose(socket);
       });
 
       socket.addEventListener("error", () => socket.close());
     } catch {
-      await this.setState("disconnected");
+      this.setState("disconnected");
       this.scheduleReconnect();
     }
   }
 
-  private async handleClose(socket: WebSocket): Promise<void> {
+  private handleClose(socket: WebSocket): void {
     if (this.socket !== socket) {
       return;
     }
     this.socket = null;
-    await this.setState("disconnected");
+    this.setState("disconnected");
     this.scheduleReconnect();
   }
 
@@ -127,12 +127,18 @@ export class BridgeClient {
     setTimeout(() => void this.connect(), delay);
   }
 
-  private async setState(state: BridgeState): Promise<void> {
+  private setState(state: BridgeState): void {
     if (this.state === state) {
       return;
     }
     this.state = state;
-    await this.stateHandler?.(state);
-    void chrome.storage.local.set({ bridgeConnectionState: state });
+    try {
+      void Promise.resolve(this.stateHandler?.(state)).catch(() => undefined);
+    } catch {
+      // A state observer must not prevent status persistence or reconnection.
+    }
+    void chrome.storage.local
+      .set({ bridgeConnectionState: state })
+      .catch(() => undefined);
   }
 }

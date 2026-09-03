@@ -7,7 +7,7 @@ const jobs = new JobManager(bridge);
 bridge.onMessage((message) => jobs.handleMessage(message));
 bridge.onState((state) => {
   if (state === "disconnected") {
-    return jobs.handleDisconnect();
+    void jobs.handleDisconnect();
   }
 });
 
