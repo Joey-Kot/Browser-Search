@@ -886,6 +886,7 @@ If the page body explicitly reports that there are no results, the endpoint retu
 |---|---|
 | `401 unauthorized` | Verify that the CLI/API Token equals `server.api_token`. |
 | `503 browser_unavailable` | Verify that the extension shows **Connected** and that the Bridge URL and `bridge.extension_token` are correct. |
+| The popup shows **Connected**, but the CLI reports `Chrome extension is not connected` | The popup reads persisted state, which can be stale after the worker stops. Opening a new tab wakes the worker and restarts the bridge, using the same event as Browser Extractor. Check `extensionConnected` in the CLI's `/v1/status` response; if the states still disagree, verify that `SEARCH_BASE_URL` and the extension's Bridge URL point to the same daemon. |
 | The extension remains disconnected and the Bridge returns `instance_conflict` | Check whether another extension is connected and whether `bridge.browser_instance_id` matches the popup instance ID. This error occurs during the WebSocket handshake. |
 | `429 queue_full` | Reduce caller concurrency or increase `executor.max_queue_size`. |
 | `504 timeout` | Increase request `timeoutMs` and `executor.max_timeout_ms`, then check network access, Google page loading, and selector waits. |

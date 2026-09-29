@@ -886,6 +886,7 @@ Configured roots matched 10 elements, but no result passed required fields: titl
 |---|---|
 | `401 unauthorized` | CLI/API 使用的 Token 是否等于 `server.api_token`。 |
 | `503 browser_unavailable` | 扩展是否显示“已连接”，Bridge 地址和 `bridge.extension_token` 是否正确。 |
+| 弹窗显示“已连接”，CLI 却提示 `Chrome extension is not connected` | 弹窗读取的是扩展保存的状态；后台停止后，该状态可能过期。打开一个新标签页会按 Browser Extractor 相同的事件唤醒方式重新启动连接。以 CLI 所访问的 `/v1/status` 中的 `extensionConnected` 为准；若仍不一致，核对 `SEARCH_BASE_URL` 与扩展 Bridge 地址是否指向同一个守护程序。 |
 | 扩展持续未连接，Bridge 返回 `instance_conflict` | 是否已有另一个扩展连接，或 `bridge.browser_instance_id` 是否与弹窗实例 ID 一致。该错误发生在 WebSocket 握手阶段。 |
 | `429 queue_full` | 降低调用并发，或者提高 `executor.max_queue_size`。 |
 | `504 timeout` | 增加请求 `timeoutMs` 和 `executor.max_timeout_ms`，并检查网络、Google 页面加载及选择器等待。 |

@@ -32,18 +32,6 @@ header p {
   font-size: 12px;
 }
 
-header p[data-state="connected"] {
-  color: #80e0c4;
-}
-
-header p[data-state="connecting"] {
-  color: #e9c46a;
-}
-
-header p[data-state="disconnected"] {
-  color: #ff9b9b;
-}
-
 form {
   display: grid;
   gap: 12px;
@@ -64,7 +52,6 @@ input {
   padding: 9px 10px;
   background: #111c2d;
   color: #f6f9fd;
-  font: inherit;
   outline: none;
 }
 
@@ -78,17 +65,8 @@ button {
   padding: 9px 12px;
   background: #35b894;
   color: #04130e;
-  font: inherit;
   font-weight: 700;
   cursor: pointer;
-}
-
-button:hover {
-  background: #45c7a4;
-}
-
-button:active {
-  background: #2fa989;
 }
 
 dl {
@@ -119,8 +97,4 @@ dd {
   margin: 12px 0 0;
   color: #80e0c4;
   font-size: 12px;
-}
-
-#message[data-kind="error"] {
-  color: #ff9b9b;
 }

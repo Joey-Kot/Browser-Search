@@ -7,7 +7,8 @@ for (const testFile of [
   "google.test.ts",
   "jobs.test.ts",
   "cdp.test.ts",
-  "bridge.test.ts"
+  "bridge.test.ts",
+  "service-worker.test.ts"
 ]) {
   const result = await build({
     entryPoints: [resolve(root, testFile)],
