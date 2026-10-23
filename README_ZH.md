@@ -208,8 +208,8 @@ stateDiagram-v2
 
 开发时：
 
-- Rust 1.97.1。
-- Node.js 24；GitHub Actions 当前使用 Node.js 24.18.1。
+- Rust 1.99.1。
+- Node.js 24.22.1（与 GitHub Actions 一致）。
 
 Node.js 只用于扩展的类型检查、测试、构建，以及第三方许可证清单校验。守护程序与 CLI 运行时不需要 Node.js。
 

@@ -208,8 +208,8 @@ Runtime:
 
 Development:
 
-- Rust 1.97.1.
-- Node.js 24; GitHub Actions currently uses Node.js 24.18.1.
+- Rust 1.99.1.
+- Node.js 24.22.1 (matching GitHub Actions).
 
 Node.js is used only for extension type checking, tests, builds, and third-party license-inventory verification. The daemon and CLI do not require Node.js at runtime.
 

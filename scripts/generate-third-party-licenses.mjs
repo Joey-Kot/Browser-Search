@@ -63,7 +63,7 @@ const additionalNotices = new Map([
   [
     "aws-lc-sys",
     {
-      versions: new Set(["0.43.0"]),
+      versions: new Set(["0.46.0"]),
       links: [
         "[AWS-LC third-party notices](THIRD_PARTY_LICENSES/AWS-LC-SYS-THIRD-PARTY.txt)"
       ]
