@@ -65,11 +65,12 @@ impl SearchCommand {
 #[derive(Debug, Clone, Args)]
 struct SearchArgs {
     /// Search keywords.
-    #[arg(long, value_name = "TEXT")]
+    #[arg(short, long, value_name = "TEXT")]
     query: String,
 
     /// Number of merged results to return.
     #[arg(
+        short = 'n',
         long = "search-num",
         value_name = "COUNT",
         default_value_t = 10,

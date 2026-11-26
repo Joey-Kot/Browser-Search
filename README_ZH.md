@@ -308,7 +308,7 @@ curl -sS -X POST http://127.0.0.1:17330/v1/search/web \
 
 ## 命令行客户端
 
-`search` 是独立于守护程序的命令行客户端。它提供 `web`、`news`、`images`、`videos` 和 `forums` 五个子命令，成功时把紧凑 JSON 数组写入标准输出。
+`search` 是独立于守护程序的命令行客户端。可用 `web`、`news`、`images`、`videos` 和 `forums` 发起搜索，搜索成功时会把紧凑 JSON 数组写入标准输出。
 
 ### CLI 环境变量
 
@@ -340,10 +340,39 @@ set "SEARCH_BASE_URL=http://127.0.0.1:17330"
 set "SEARCH_API_KEY=YOUR_API_TOKEN"
 ```
 
+### Shell 自动补全
+
+把 `search` 加入 `PATH`，将对应命令添加到 Shell 启动文件，再打开新的会话。补全在本地运行，配置 API 密钥前即可使用。
+
+```bash
+# Bash（~/.bashrc）
+eval "$(search completion bash)"
+
+# Zsh（~/.zshrc，放在 compinit 之后）
+eval "$(search completion zsh)"
+```
+
+如果 Zsh 尚未初始化补全，在上述 Zsh 命令之前添加 `autoload -Uz compinit && compinit`。
+
+```fish
+# Fish（~/.config/fish/config.fish）
+search completion fish | source
+```
+
+```powershell
+# PowerShell（$PROFILE）
+search completion powershell | Out-String | Invoke-Expression
+```
+
+```elvish
+# Elvish（rc.elv）
+eval (search completion elvish | slurp)
+```
+
 ### CLI 基本请求
 
 ```bash
-search web --query "Tokyo" --search-num 100
+search web -q "Tokyo" -n 100
 search news --query "OpenAI" --search-num 20
 search images --query "Tokyo skyline" --search-num 50
 search videos --query "Tokyo travel" --search-num 30
@@ -359,12 +388,12 @@ search web --help
 
 ### CLI 参数
 
-五个子命令使用相同参数：
+五个搜索子命令使用相同参数。
 
 | 参数 | 必填/默认值 | 作用 |
 |---|---|---|
-| `--query <TEXT>` | 必填 | 搜索关键词；清理首尾空白后不能为空，最多 512 个字符。 |
-| `--search-num <COUNT>` | `10` | 目标返回数量，范围 `1..100`；实际结果可能因页面结果、必填字段过滤或去重而更少。 |
+| `-q, --query <TEXT>` | 必填 | 搜索关键词；清理首尾空白后不能为空，最多 512 个字符。 |
+| `-n, --search-num <COUNT>` | `10` | 目标返回数量，范围 `1..100`；实际结果可能因页面结果、必填字段过滤或去重而更少。 |
 | `--timeout <SECONDS>` | `120` | 每个 CLI 到守护程序 HTTP 请求的超时；设置 `--search-timeout` 时必须至少比它大 2 秒。 |
 | `--search-timeout <SECONDS>` | 服务端默认值 | 每个分页搜索任务的服务端超时，CLI 转换为请求中的 `timeoutMs`。 |
 | `--help` | — | 显示当前命令的用法和参数。 |
@@ -387,7 +416,7 @@ CLI 会先请求 `/v1/status`，读取 `maxConcurrency` 作为当前命令的最
 
 ### CLI 输出和退出行为
 
-成功输出与对应 HTTP API 相同的 JSON 数组：
+搜索成功时输出与对应 HTTP API 相同的 JSON 数组。
 
 ```json
 [

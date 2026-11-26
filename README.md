@@ -308,7 +308,7 @@ curl -sS -X POST http://127.0.0.1:17330/v1/search/web \
 
 ## Command-Line Client
 
-`search` is a standalone client for the daemon. It provides `web`, `news`, `images`, `videos`, and `forums` subcommands and writes a compact JSON array to standard output on success.
+`search` is a standalone client for the daemon. Use `web`, `news`, `images`, `videos`, or `forums` to run a search and write a compact JSON array to standard output.
 
 ### CLI Environment Variables
 
@@ -340,10 +340,39 @@ set "SEARCH_BASE_URL=http://127.0.0.1:17330"
 set "SEARCH_API_KEY=YOUR_API_TOKEN"
 ```
 
+### Shell Completion
+
+With `search` on `PATH`, add the line for your shell to its startup file and open a new session. Completion runs locally and is available before you configure the API key.
+
+```bash
+# Bash (~/.bashrc)
+eval "$(search completion bash)"
+
+# Zsh (~/.zshrc, after compinit)
+eval "$(search completion zsh)"
+```
+
+If Zsh completion has yet to be initialized, add `autoload -Uz compinit && compinit` before the Zsh line.
+
+```fish
+# Fish (~/.config/fish/config.fish)
+search completion fish | source
+```
+
+```powershell
+# PowerShell ($PROFILE)
+search completion powershell | Out-String | Invoke-Expression
+```
+
+```elvish
+# Elvish (rc.elv)
+eval (search completion elvish | slurp)
+```
+
 ### Basic CLI Requests
 
 ```bash
-search web --query "Tokyo" --search-num 100
+search web -q "Tokyo" -n 100
 search news --query "OpenAI" --search-num 20
 search images --query "Tokyo skyline" --search-num 50
 search videos --query "Tokyo travel" --search-num 30
@@ -359,12 +388,12 @@ search web --help
 
 ### CLI Options
 
-All five subcommands use the same options:
+All five search subcommands use the same options.
 
 | Option | Required/default | Purpose |
 |---|---|---|
-| `--query <TEXT>` | Required | Search terms. Leading and trailing whitespace is removed; the remaining value must be non-empty and at most 512 characters. |
-| `--search-num <COUNT>` | `10` | Target result count from `1..100`. The actual count can be lower because of available page results, required-field filtering, or deduplication. |
+| `-q, --query <TEXT>` | Required | Search terms. Leading and trailing whitespace is removed; the remaining value must be non-empty and at most 512 characters. |
+| `-n, --search-num <COUNT>` | `10` | Target result count from `1..100`. The actual count can be lower because of available page results, required-field filtering, or deduplication. |
 | `--timeout <SECONDS>` | `120` | Timeout for each CLI-to-daemon HTTP request. When `--search-timeout` is set, this value must be at least two seconds greater. |
 | `--search-timeout <SECONDS>` | Daemon default | Server-side timeout for each search page. The CLI converts seconds to request `timeoutMs`. |
 | `--help` | — | Show usage and options for the current command. |
@@ -387,7 +416,7 @@ Image search is not paginated. The CLI sends one image API request, the daemon e
 
 ### CLI Output and Exit Behavior
 
-Successful output is the same JSON array returned by the corresponding HTTP endpoint:
+A successful search writes the same JSON array returned by the corresponding HTTP endpoint.
 
 ```json
 [
